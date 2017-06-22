@@ -4,25 +4,30 @@ const logger = require('morgan')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const cors = require('cors')
-require('dotenv').config()
 const app = express()
-
 const links = require('./api/links')
 const posts = require('./api/posts')
 const users = require('./api/users')
-const auth = require('./auth')
+const auth = require('./auth/index')
+const authMiddleware = require('./auth/middleware')
+const dotenv = require('dotenv').config()
 
-app.use(cors())
+app.use(cors({
+  credentials: true,
+  origin: 'http://localhost:3001'
+}))
 app.use(logger('dev'))
 app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({
+  extended: false
+}))
 app.use(cookieParser(process.env.COOKIE_SECRET))
 
 app.use('/auth', auth)
 
 app.use('/api/v1/links', links)
 app.use('/api/v1/posts', posts)
-app.use('/api/v1/users', users)
+app.use('/api/v1/users', authMiddleware.ensureLoggedIn, users)
 
 app.use(function(req, res, next) {
   const err = new Error('Not Found')
@@ -31,11 +36,12 @@ app.use(function(req, res, next) {
 })
 
 app.use(function(err, req, res, next) {
-    res.status(err.status || 500)
-    res.json({
-        message: err.message,
-        error: req.app.get('env') === 'development' ? err : {}
-    })
+  res.status(500)
+  // res.status(err.status || res.statusCode || 500)
+  res.json({
+    message: err.message,
+    error: req.app.get('env') === 'development' ? err : {}
+  })
 })
 
 module.exports = app

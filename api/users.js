@@ -40,7 +40,7 @@ router.put('/:id', isValidId, (req,res,next)=>{
     } else {next(new Error('try again'))}
 })
 router.delete('/:id',isValidId, (req,res)=>{
-    queries.deleteUser(req.params.id, 'users').then(()=>{res.json({deleted:true})})
+    queries.delete(req.params.id, 'users').then(()=>{res.json({deleted:true})})
 })
 
 

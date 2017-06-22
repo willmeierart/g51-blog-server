@@ -11,7 +11,7 @@ router.get('/', (req,res)=>{
 
 function validUser(user){
     const validEmail = typeof user.email == 'string' && user.email.trim() != ''
-    const validPassword = typeof user.password == 'string' && user.password.trim() != '' && user.password.trim().length >= 6
+    const validPassword = typeof user.password == 'string' && user.password.trim() != '' && user.password.trim().length >= 4
     return validEmail && validPassword
 }
 
@@ -42,6 +42,7 @@ router.post('/signup', (req, res, next)=>{
 })
 
 router.post('/login', (req,res, next)=>{
+    console.log(req.body)
     if(validUser(req.body)){
         //check if in db
         User.getUserByEmail(req.body.email).then(user=>{
@@ -59,6 +60,7 @@ router.post('/login', (req,res, next)=>{
                             signed: true
                         })
                         res.json({
+                            id: user.id,
                             message: 'Logged in! 🔓'
                         })
                     }

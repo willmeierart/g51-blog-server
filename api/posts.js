@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const queries = require('../db/queries')
+const authMiddleware = require('../auth/middleware')
 
 const isValidId = (req, res, next) => {
   if (!isNaN(req.params.id)) {
@@ -26,18 +27,18 @@ router.get('/:id', isValidId, (req, res) => {
          res.json(posts[0])
     })
 })
-router.post('/', (req, res, next) => {
+router.post('/', authMiddleware.ensureLoggedIn, (req, res, next) => {
     queries.create(req.body, 'posts').then(posts => {
       if(posts) res.json(posts)
       else next(new Error('invalid post'))
   })
 })
-router.put('/:id', isValidId, (req,res,next)=>{
+router.put('/:id', authMiddleware.ensureLoggedIn, isValidId, (req,res,next)=>{
     if (isValidPost(req.body)){
         queries.update(req.params.id, req.body, 'posts').then(posts =>{res.json(posts[0])})
     } else {next(new Error('invalid post'))}
 })
-router.delete('/:id',isValidId, (req,res)=>{
+router.delete('/:id', authMiddleware.ensureLoggedIn, isValidId, (req,res)=>{
     queries.delete(req.params.id, 'posts').then(()=>{res.json({deleted:true})})
 })
 
