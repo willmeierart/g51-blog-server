@@ -50,6 +50,7 @@ function setUserIdCookie(req, res, id) {
     signed: true
   })
   res.json({
+    id: id,
     message: '🔓'
   })
 }
